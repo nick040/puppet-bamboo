@@ -1,50 +1,18 @@
-# == Class: bamboo::service
+# == Class bamboo::service
 #
-# Full description of class bamboo here.
-#
-# === Parameters
-#
-# Document parameters here.
-#
-# [*sample_parameter*]
-#   Explanation of what this parameter affects and what it defaults to.
-#   e.g. "Specify one or more upstream ntp servers as an array."
-#
-# === Variables
-#
-# Here you should define a list of variables that this module would require.
-#
-# [*sample_variable*]
-#   Explanation of how this variable affects the funtion of this class and if it
-#   has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#   External Node Classifier as a comma separated list of hostnames." (Note,
-#   global variables should not be used in preference to class parameters  as of
-#   Puppet 2.6.)
-#
-# === Examples
-#
-#  class { bamboo:
-#    servers => [ 'pool.ntp.org', 'ntp.local.company.com' ]
-#  }
-#
-# === Authors
-#
-# Author Name <author@domain.com>
-#
-# === Copyright
-#
-# Copyright 2013 Your name here, unless otherwise noted.
-#
-class bamboo::service {
-
-  service { 'bamboo':
-    ensure    => 'running',
-    provider  => base,
-    start     => '/etc/init.d/bamboo start',
-    restart   => '/etc/init.d/bamboo restart',
-    stop      => '/etc/init.d/bamboo stop',
-    status    => '/etc/init.d/bamboo status',
-    require   => Class['bamboo::config'],
+class bamboo::service(
+  $service_name   = $bamboo::service_name,
+  $service_manage = $bamboo::service_manage,
+  $service_ensure = $bamboo::service_ensure,
+  $service_enable = $bamboo::service_enable,
+) {
+  if $bamboo::service_manage {
+    service { $service_name:
+      ensure     => $service_ensure,
+      enable     => $service_enable,
+      enable     => true,
+      hasstatus  => true,
+      hasrestart => true,
+    }
   }
-
 }

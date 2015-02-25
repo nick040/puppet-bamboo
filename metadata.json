@@ -1,0 +1,49 @@
+{
+  "name": "mkrakowitzer-bamboo",
+  "version": "0.1.0",
+  "author": "mkrakowitzer",
+  "summary": "This module installs and manages the bamboo configuration files.",
+  "license": "MIT",
+  "source": "https://github.com/mkrakowitzer/puppet-bamboo",
+  "project_page": "https://github.com/mkrakowitzer/puppet-bamboo",
+  "issues_url": "https://github.com/mkrakowitzer/puppet-bamboo/issues",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 3.0.0"
+    },
+    {
+      "name": "nanliu/staging",
+      "version_requirement": ">= 1.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "12.04",
+        "14.04"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    }
+  ]
+}

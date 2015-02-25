@@ -1,78 +1,78 @@
-# == Class: bamboo
+# == Class bamboo::config
 #
-# Full description of class bamboo here.
-#
-# === Parameters
-#
-# Document parameters here.
-#
-# [*sample_parameter*]
-#   Explanation of what this parameter affects and what it defaults to.
-#   e.g. "Specify one or more upstream ntp servers as an array."
-#
-# === Variables
-#
-# Here you should define a list of variables that this module would require.
-#
-# [*sample_variable*]
-#   Explanation of how this variable affects the funtion of this class and if it
-#   has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#   External Node Classifier as a comma separated list of hostnames." (Note,
-#   global variables should not be used in preference to class parameters  as of
-#   Puppet 2.6.)
-#
-# === Examples
-#
-#  class { bamboo:
-#    servers => [ 'pool.ntp.org', 'ntp.local.company.com' ]
-#  }
-#
-# === Authors
-#
-# Author Name <author@domain.com>
-#
-# === Copyright
-#
-# Copyright 2013 Your name here, unless otherwise noted.
-#
-class bamboo::config {
+class bamboo::config(
+  $javahome            = $bamboo::javahome,
+  $installdir          = $bamboo::installdir,
+  $homedir             = $bamboo::homedir,
+  $user                = $bamboo::user,
+  $group               = $bamboo::group,
+  $webappdir           = $bamboo::webappdir,
+  $jvm_xms             = $bamboo::jvm_xms,
+  $jvm_xmx             = $bamboo::jvm_xmx,
+  $jvm_permgen         = $bamboo::jvm_permgen,
+  $jvm_args            = $bamboo::jvm_support_recommended_args,
+  $tomcat_port         = $bamboo::tomcat_port,
+  $tomcat_max_threads  = $bamboo::tomcat_max_threads,
+  $tomcat_accept_count = $bamboo::tomcat_accept_count,
+  $tomcat_proxy        = $bamboo::tomcat_proxy,
+  $tomcat_extras       = $bamboo::tomcat_extras,
+  $manage_server_xml   = $bamboo::manage_server_xml,
+) {
 
   File {
-    owner => $bamboo::user,
-    group => $bamboo::group,
+    owner => $user,
+    group => $group,
   }
 
-  file { "${bamboo::homedir}/logs":
+  file { "${homedir}/logs":
     ensure  => directory,
-  } ->
+  }
 
-  file { "${bamboo::webappdir}/webapp/WEB-INF/classes/bamboo-init.properties":
+  file { "${webappdir}/atlassian-bamboo/WEB-INF/classes/bamboo-init.properties":
     content => template('bamboo/bamboo-init.properties.erb'),
     mode    => '0755',
-  } ~>
-
-  file { "${bamboo::webappdir}/conf/wrapper.conf":
-    content => template('bamboo/wrapper.conf.erb'),
-    mode    => '0755',
-  } ~>
-
-  file { "${bamboo::webappdir}/bamboo.sh":
-    ensure  => present,
-    content => template('bamboo/bamboo.sh.erb'),
-    mode    => '0700'
-  } ~>
-
-  file { '/etc/init.d/bamboo':
-    ensure => link,
-    target => "${bamboo::webappdir}/bamboo.sh",
-  } ~>
-
-  file { '/etc/default/bamboo':
-    ensure  => present,
-    content => template('bamboo/bamboo-default.erb'),
-    require => Class['bamboo::install'],
-    notify  => Class['bamboo::service'],
   }
 
+  file { "${webappdir}/bin/setenv.sh":
+    content => template('bamboo/setenv.sh.erb'),
+    mode    => '0755',
+  }
 
+  if $manage_server_xml == 'augeas' {
+    $_tomcat_max_threads  = { maxThreads  => $tomcat_max_threads }
+    $_tomcat_accept_count = { acceptCount => $tomcat_accept_count }
+    $_tomcat_port         = { port        => $tomcat_port }
+  
+    $parameters = merge($_tomcat_max_threads, $_tomcat_accept_count, $tomcat_proxy, $tomcat_extras, $_tomcat_port )
+  
+    if versioncmp($::augeasversion, '1.0.0') < 0 {
+      fail('This module requires Augeas >= 1.0.0')
+    }
+  
+    $path = "Server/Service[#attribute/name='Tomcat-Standalone']"
+  
+    if ! empty($parameters) {
+      $_parameters = suffix(prefix(join_keys_to_values($parameters, " '"), "set ${path}/Connector/#attribute/"), "'")
+    } else {
+      $_parameters = undef
+    }
+  
+    $changes = delete_undef_values([$_parameters])
+  
+    if ! empty($changes) {
+      augeas { "${webappdir}/conf/server.xml":
+        lens    => 'Xml.lns',
+        incl    => "${webappdir}/conf/server.xml",
+        changes => $changes,
+      }
+    }
+
+  } elsif $manage_server_xml == 'template' {
+
+    file { "${webappdir}/conf/server.xml":
+      content => template('bamboo/server.xml.erb'),
+      mode    => '0600',
+    }
+
+  }
 }
