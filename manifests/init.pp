@@ -20,6 +20,7 @@ class bamboo (
   $homedir      = '/home/bamboo',
   $user         = 'bamboo',
   $group        = 'bamboo',
+  $shell        = '/bin/true',
 
   # Misc Settings
   $downloadURL  = 'http://www.atlassian.com/software/bamboo/downloads/binary/',

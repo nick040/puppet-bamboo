@@ -8,6 +8,7 @@ class bamboo::install (
   $homedir      = $bamboo::homedir,
   $user         = $bamboo::user,
   $group        = $bamboo::group,
+  $shell        = $bamboo::shell,
   $webappdir    = $bamboo::webappdir,
   $downloadURL  = $bamboo::downloadURL,
   $file         = $bamboo::file,
@@ -15,7 +16,7 @@ class bamboo::install (
 
   user { $user:
     comment          => 'Bamboo daemon account',
-    shell            => '/bin/true',
+    shell            => $shell,
     home             => $homedir,
     password         => '*',
     password_min_age => '0',
