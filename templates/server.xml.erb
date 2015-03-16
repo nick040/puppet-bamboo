@@ -46,25 +46,23 @@
         Documentation at /docs/config/service.html
     -->
     <Service name="Catalina">
-
           <Connector port="<%= @tomcat_port %>"
-
-		  maxThreads="<%= @tomcat_max_threads %>"
+                   maxThreads="<%= @tomcat_max_threads %>"
                    minSpareThreads="25"
                    connectionTimeout="20000"
-
                    enableLookups="false"
                    maxHttpHeaderSize="8192"
                    protocol="HTTP/1.1"
                    useBodyEncodingForURI="true"
                    redirectPort="8443"
-		   acceptCount="<%= @tomcat_accept_count %>"
-                   disableUploadTimeout="true"/>
+                   acceptCount="<%= @tomcat_accept_count %>"
+                   disableUploadTimeout="true"
 <% if @tomcat_proxy -%>
 <%   @tomcat_proxy.sort.each do |key,value| -%>
                    <%= key %>=<%= "\"#{value}\"" %>
 <%   end -%>
 <% end -%>
+/>
         <!--
         ====================================================================================
 
