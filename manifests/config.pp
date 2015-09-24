@@ -16,16 +16,13 @@ class bamboo::config(
   $tomcat_accept_count = $bamboo::tomcat_accept_count,
   $tomcat_proxy        = $bamboo::tomcat_proxy,
   $tomcat_extras       = $bamboo::tomcat_extras,
+  $tomcat_context_path = $bamboo::tomcat_context_path,
   $manage_server_xml   = $bamboo::manage_server_xml,
 ) {
 
   File {
     owner => $user,
     group => $group,
-  }
-
-  file { "${homedir}/logs":
-    ensure  => directory,
   }
 
   file { "${webappdir}/atlassian-bamboo/WEB-INF/classes/bamboo-init.properties":
@@ -42,23 +39,23 @@ class bamboo::config(
     $_tomcat_max_threads  = { maxThreads  => $tomcat_max_threads }
     $_tomcat_accept_count = { acceptCount => $tomcat_accept_count }
     $_tomcat_port         = { port        => $tomcat_port }
-  
+
     $parameters = merge($_tomcat_max_threads, $_tomcat_accept_count, $tomcat_proxy, $tomcat_extras, $_tomcat_port )
-  
+
     if versioncmp($::augeasversion, '1.0.0') < 0 {
       fail('This module requires Augeas >= 1.0.0')
     }
-  
+
     $path = "Server/Service[#attribute/name='Tomcat-Standalone']"
-  
+
     if ! empty($parameters) {
       $_parameters = suffix(prefix(join_keys_to_values($parameters, " '"), "set ${path}/Connector/#attribute/"), "'")
     } else {
       $_parameters = undef
     }
-  
+
     $changes = delete_undef_values([$_parameters])
-  
+
     if ! empty($changes) {
       augeas { "${webappdir}/conf/server.xml":
         lens    => 'Xml.lns',

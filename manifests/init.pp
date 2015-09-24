@@ -13,14 +13,16 @@ class bamboo (
   $javahome,
 
   # Bamboo Settings
-  $version      = '5.7.2',
+  $version      = '5.9.2',
   $product      = 'bamboo',
   $format       = 'tar.gz',
   $installdir   = '/opt/bamboo',
-  $homedir      = '/home/bamboo',
+  $homedir      = '/var/lib/bamboo-home',
   $user         = 'bamboo',
   $group        = 'bamboo',
-  $shell        = '/bin/true',
+  $shell        = '/bin/sh',
+  $os_home      = undef,
+  $base_url     = "http://${::fqdn}:8085",
 
   # Misc Settings
   $downloadURL  = 'http://www.atlassian.com/software/bamboo/downloads/binary/',
@@ -44,9 +46,10 @@ class bamboo (
   $tomcat_max_threads  = 150,
   $tomcat_accept_count = 100,
   # Reverse https proxy setting for tomcat
-  $tomcat_proxy = {},
+  $tomcat_proxy        = {},
+  $tomcat_context_path = '',
   # Any additional tomcat params for server.xml
-  $tomcat_extras = {},
+  $tomcat_extras       = {},
 
 # TODO: Configure the database as part of install
 #  # Database Settings

@@ -4,9 +4,11 @@ After=syslog.target network.target
    
 [Service]
 Type=forking
-Environment=JAVA_HOME=/usr/lib64/java/current
-ExecStart=/services/bamboo/current/bin/startup.sh
-ExecStop=/services/bamboo/current/bin/shutdown.sh
+Environment="JAVA_HOME=<%= scope.lookupvar('bamboo::javahome') %>"
+PIDFile=<%= scope.lookupvar('bamboo::webappdir') %>/work/catalina.pid
+User=<%= scope.lookupvar('bamboo::user') %>
+ExecStart=<%= scope.lookupvar('bamboo::webappdir') %>/bin/start-bamboo.sh
+ExecStop=<%= scope.lookupvar('bamboo::webappdir') %>/bin/stop-bamboo.sh
    
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,121 @@
+#!/bin/bash
+#-----------------------------------------------------------------------------
+#   Copyright (c) 2012 Bryce Johnson
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#-----------------------------------------------------------------------------
+### BEGIN INIT INFO
+# Provides: bamboo 
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Should-Stop: 
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start up Bamboo 
+# Description:       Atlassian Bamboo
+#                    This service starts up the tomcat webapp.
+### END INIT INFO
+ACTION=$1
+SERVICE=bamboo
+lockfile=/var/lock/subsys/$SERVICE
+USER=<%= scope.lookupvar('bamboo::user') %>
+
+export JAVA_HOME=<%= scope.lookupvar('bamboo::javahome') %>
+export CATALINA_HOME=<%= scope.lookupvar('bamboo::webappdir') %>
+
+tomcat_pid() {
+   echo `ps aux | grep "Dcatalina.base=$CATALINA_HOME" | grep -v grep | awk '{ print $2 }'`
+}
+
+function restart() {
+  stop
+  
+  start
+}
+
+function stop() {
+  echo -n $"Shutting down $SERVICE: "
+  /bin/su - $USER -c "$CATALINA_HOME/bin/shutdown.sh &> /dev/null"
+  RETVAL=$?
+  echo
+  
+  # wait for process to terminate
+  for i in {0..60}
+  do
+    pid=$(tomcat_pid)
+    
+    if [ -z "$pid" ]
+    then
+      break
+    fi
+    
+    sleep 1
+  done
+
+  #If all is well remove the lockfile
+  [ $RETVAL -eq 0 ] && rm -f $lockfile
+  return $RETVAL
+}
+
+function start() {
+  echo -n $"Starting $SERVICE: "
+  /bin/su - $USER -c "cd $CATALINA_HOME/logs && $CATALINA_HOME/bin/startup.sh &> /dev/null"
+  RETVAL=$?
+  echo
+
+  #If all is well touch the lock file
+  [ $RETVAL -eq 0 ] && touch $lockfile
+  return $RETVAL
+}
+
+function status() {
+  pid=$(tomcat_pid)
+  if [ -n "$pid" ]
+  then
+    echo "$SERVICE is running"
+    return 0
+  else
+    echo "$SERVICE is stopped"
+    return 1
+  fi
+}
+
+function pid() {
+  tomcat_pid
+}
+
+function execute() {
+  case "$ACTION" in
+    start)
+      start
+      ;;
+    stop)
+      stop
+      ;;
+    status)
+      status
+      ;;
+    restart)
+      restart
+      ;;
+    pid)
+      pid
+      ;;
+    *)
+      echo "Usage: $0 {start|stop|status|restart}"
+      exit 1
+  esac
+}
+
+execute

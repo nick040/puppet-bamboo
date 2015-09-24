@@ -1,12 +1,12 @@
 {
-  "name": "mkrakowitzer-bamboo",
+  "name": "nick040-bamboo",
   "version": "0.1.0",
-  "author": "mkrakowitzer",
+  "author": "nick040",
   "summary": "This module installs and manages the bamboo configuration files.",
   "license": "MIT",
-  "source": "https://github.com/mkrakowitzer/puppet-bamboo",
-  "project_page": "https://github.com/mkrakowitzer/puppet-bamboo",
-  "issues_url": "https://github.com/mkrakowitzer/puppet-bamboo/issues",
+  "source": "https://github.com/nick040/puppet-bamboo",
+  "project_page": "https://github.com/nick040/puppet-bamboo",
+  "issues_url": "https://github.com/nick040/puppet-bamboo/issues",
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
